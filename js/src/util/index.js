@@ -124,20 +124,6 @@ const getElement = obj => {
   return null
 }
 
-const typeCheckConfig = (componentName, config, configTypes) => {
-  Object.keys(configTypes).forEach(property => {
-    const expectedTypes = configTypes[property]
-    const value = config[property]
-    const valueType = value && isElement(value) ? 'element' : toType(value)
-
-    if (!new RegExp(expectedTypes).test(valueType)) {
-      throw new TypeError(
-        `${componentName.toUpperCase()}: Option "${property}" provided type "${valueType}" but expected type "${expectedTypes}".`
-      )
-    }
-  })
-}
-
 const isVisible = element => {
   if (!isElement(element) || element.getClientRects().length === 0) {
     return false
@@ -317,7 +303,6 @@ export {
   getTransitionDurationFromElement,
   triggerTransitionEnd,
   isElement,
-  typeCheckConfig,
   isVisible,
   isDisabled,
   findShadowRoot,
@@ -329,5 +314,6 @@ export {
   isRTL,
   defineJQueryPlugin,
   execute,
-  executeAfterTransition
+  executeAfterTransition,
+  toType
 }
