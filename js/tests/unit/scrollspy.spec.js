@@ -7,7 +7,7 @@ import { clearFixture, createEvent, getFixture, jQueryMock } from '../helpers/fi
 describe('ScrollSpy', () => {
   let fixtureEl
 
-  const onScrollStop = (callback, element, timeout = 100) => {
+  const onScrollStop = (callback, element, timeout = 30) => {
     let handle = null
     const onScroll = function () {
       if (handle) {
@@ -17,7 +17,7 @@ describe('ScrollSpy', () => {
       handle = setTimeout(() => {
         element.removeEventListener('scroll', onScroll)
         callback()
-      }, timeout + 10)
+      }, timeout + 1)
     }
 
     element.addEventListener('scroll', onScroll)
@@ -43,13 +43,8 @@ describe('ScrollSpy', () => {
     const paddingTop = 5
     const parentOffset = getComputedStyle(contentEl).getPropertyValue('position') === 'relative' ? 0 : contentEl.offsetTop
     const scrollHeight = (target.offsetTop - parentOffset) + paddingTop
-    // eslint-disable-next-line no-console
-    console.warn('--------------')
-    // eslint-disable-next-line no-console
-    console.log(scrollHeight, target.offsetTop, contentEl.offsetTop)
 
     function listener() {
-      // console.log(fixtureEl.innerHTML.replace(/</g, '\n <'), scrollHeight)
       expect(element.classList.contains('active')).toEqual(true)
       expect(scrollSpy._activeTarget).toEqual(element)
       spy.calls.reset()
@@ -59,21 +54,15 @@ describe('ScrollSpy', () => {
     setTimeout(() => { // in case we scroll something before the test
       onScrollStop(listener, contentEl)
       contentEl.scrollTo({ top: scrollHeight })
-    }, 5)
+    }, 50)
   }
 
   beforeAll(() => {
     fixtureEl = getFixture()
   })
-  beforeEach(() => {
-    // eslint-disable-next-line no-console
-    console.clear()
-  })
 
   afterEach(() => {
     clearFixture()
-    // eslint-disable-next-line no-console
-    console.log('------end--------')
   })
 
   describe('VERSION', () => {
@@ -142,14 +131,45 @@ describe('ScrollSpy', () => {
         '    </div>',
         '  </div>',
         '  <div id="scrollspy-example" style="height: 100px; overflow: auto;">',
-        '    <div style="height: 200px;">',
-        '      <h4 id="masthead">Overview</h4>',
-        '      <p style="height: 200px;"></p>',
+        '    <div style="height: 200px;" id="masthead">Overview</div>',
+        '    <div style="height: 200px;" id="detail">Detail</div>',
+        '  </div>',
+        '</div>'
+      ].join('')
+
+      const scrollSpyEl = fixtureEl.querySelector('#scrollspy-example')
+      const rootEl = fixtureEl.querySelector('#root')
+      const scrollSpy = new ScrollSpy(scrollSpyEl, {
+        target: '#ss-target'
+      })
+
+      spyOn(scrollSpy, '_process').and.callThrough()
+
+      onScrollStop(() => {
+        expect(rootEl.classList.contains('active')).toEqual(true)
+        expect(scrollSpy._process).toHaveBeenCalled()
+        done()
+      }, scrollSpyEl)
+
+      scrollSpyEl.scrollTo({ top: 350 })
+    })
+
+    it('should only switch "active" class on current target specified w element', done => {
+      fixtureEl.innerHTML = [
+        '<div id="root" class="active" style="display: block">',
+        '  <div class="topbar">',
+        '    <div class="topbar-inner">',
+        '      <div class="container" id="ss-target">',
+        '        <ul class="nav">',
+        '          <li class="nav-item"><a href="#masthead">Overview</a></li>',
+        '          <li class="nav-item"><a href="#detail">Detail</a></li>',
+        '        </ul>',
+        '      </div>',
         '    </div>',
-        '    <div style="height: 200px;">',
-        '      <h4 id="detail">Detail</h4>',
-        '      <p style="height: 200px;"></p>',
-        '    </div>',
+        '  </div>',
+        '  <div id="scrollspy-example" style="height: 100px; overflow: auto;">',
+        '    <div style="height: 200px;" id="masthead">Overview</div>',
+        '    <div style="height: 200px;" id="detail">Detail</div>',
         '  </div>',
         '</div>'
       ].join('')
@@ -169,30 +189,28 @@ describe('ScrollSpy', () => {
         done()
       }, scrollSpyEl)
 
-      scrollSpyEl.scrollTo({ top: 350, behavior: 'smooth' })
+      scrollSpyEl.scrollTo({ top: 350 })
     })
 
     it('should correctly select middle navigation option when large offset is used', done => {
       fixtureEl.innerHTML = [
-        '<div id="wrapper">',
-        '  <div id="header" style="height: 500px;"></div>',
-        '  <nav id="navigation" class="navbar">',
-        '   <ul class="navbar-nav">',
-        '     <li class="nav-item"><a class="nav-link active" id="one-link" href="#one">One</a></li>',
-        '     <li class="nav-item"><a class="nav-link" id="two-link" href="#two">Two</a></li>',
-        '     <li class="nav-item"><a class="nav-link" id="three-link" href="#three">Three</a></li>',
-        '   </ul>',
-        '  </nav>',
-        '  <div id="content" style="height: 200px; overflow-y: auto;">',
-        '   <div id="one" style="height: 500px;"></div>',
-        '   <div id="two" style="height: 300px;"></div>',
-        '   <div id="three" style="height: 10px;"></div>',
-        '  </div>',
+        '<div id="header" style="height: 500px;"></div>',
+        '<nav id="navigation" class="navbar">',
+        ' <ul class="navbar-nav">',
+        '   <li class="nav-item"><a class="nav-link active" id="one-link" href="#one">One</a></li>',
+        '   <li class="nav-item"><a class="nav-link" id="two-link" href="#two">Two</a></li>',
+        '   <li class="nav-item"><a class="nav-link" id="three-link" href="#three">Three</a></li>',
+        ' </ul>',
+        '</nav>',
+        '<div id="content" style="height: 200px; overflow-y: auto;">',
+        ' <div id="one" style="height: 500px;"></div>',
+        ' <div id="two" style="height: 300px;"></div>',
+        ' <div id="three" style="height: 10px;"></div>',
         '</div>'
       ].join('')
 
       const contentEl = fixtureEl.querySelector('#content')
-      const scrollSpy = new ScrollSpy('#wrapper', {
+      const scrollSpy = new ScrollSpy(fixtureEl, {
         target: '#navigation',
         offset: Manipulator.position(contentEl).top
       })

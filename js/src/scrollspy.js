@@ -5,7 +5,11 @@
  * --------------------------------------------------------------------------
  */
 
-import { defineJQueryPlugin, getElement, reflow, typeCheckConfig } from './util/index'
+import {
+  defineJQueryPlugin,
+  getElement,
+  typeCheckConfig
+} from './util/index'
 import EventHandler from './dom/event-handler'
 import Manipulator from './dom/manipulator'
 import SelectorEngine from './dom/selector-engine'
@@ -23,15 +27,15 @@ const EVENT_KEY = `.${DATA_KEY}`
 const DATA_API_KEY = '.data-api'
 
 const Default = {
-  target: null,
   offset: null, // @deprecated, only for backwards Compatibility reasons
-  rootMargin: '0px 0px -40%'
+  rootMargin: '0px 0px -40%',
+  target: null
 }
 
 const DefaultType = {
-  target: 'element',
   offset: '(number|null)', // @deprecated, only for backwards Compatibility reasons
-  rootMargin: 'string'
+  rootMargin: 'string',
+  target: 'element'
 }
 
 const EVENT_ACTIVATE = `activate${EVENT_KEY}`
@@ -58,7 +62,7 @@ class ScrollSpy extends BaseComponent {
   constructor(element, config) {
     super(element)
 
-    // this._element is  the observablesContainer
+    // this._element is the observablesContainer and config.target the menu-links wrapper
     this._config = this._getConfig(config)
 
     this._targetLinks = []
@@ -81,16 +85,14 @@ class ScrollSpy extends BaseComponent {
   // Public
 
   refresh() {
-    // `${SELECTOR_NAV_LINKS}, ${SELECTOR_LIST_ITEMS}, .${CLASS_NAME_DROPDOWN_ITEM}`
     this._targetLinks = SelectorEngine
-      .find('[href]', this._config.target)
+      .find('[href]', this._config.target)// `${SELECTOR_NAV_LINKS}, ${SELECTOR_LIST_ITEMS}, .${CLASS_NAME_DROPDOWN_ITEM}`
       .filter(el => el.hash.length > 0)// ensure that all have id
 
     this._observableSections = this._targetLinks
       .map(el => SelectorEngine.findOne(el.hash, this._element))
       .filter(el => el)// filter nulls
 
-    reflow(this._element)
     if (this._observer) {
       this._observer.disconnect()
     } else {
@@ -102,7 +104,6 @@ class ScrollSpy extends BaseComponent {
 
   dispose() {
     this._observer.disconnect()
-    EventHandler.off(this._scrollElement, EVENT_KEY)
     super.dispose()
   }
 
@@ -140,7 +141,6 @@ class ScrollSpy extends BaseComponent {
       SelectorEngine.findOne(SELECTOR_DROPDOWN_TOGGLE, target.closest(SELECTOR_DROPDOWN))
         .classList.add(CLASS_NAME_ACTIVE)
     } else {
-      SelectorEngine.parents(target, SELECTOR_NAV_LIST_GROUP)
       SelectorEngine.parents(target, SELECTOR_NAV_LIST_GROUP)
         .forEach(listGroup => {
           // Set triggered links parents as active
