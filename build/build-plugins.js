@@ -71,8 +71,7 @@ const allPlugins = {
 }
 
 const makePluginPath = (pluginKey, basePath) => {
-  // eslint-disable-next-line no-prototype-builtins
-  if (nodePlugins.hasOwnProperty(pluginKey)) {
+  if (Object.prototype.hasOwnProperty.call(nodePlugins, pluginKey)) {
     return nodePlugins[pluginKey]
   }
 
@@ -100,7 +99,9 @@ const build = async pluginKey => {
     plugins,
     external: source => {
       // eslint-disable-next-line no-unused-vars
-      const plugin = Object.entries(allPlugins).find(([key, path]) => path.includes(source.replace('../', '').replace('./', '')))
+      const plugin = Object.entries(allPlugins).find(([key, path]) => {
+        return path.includes(source.replace('../', '').replace('./', ''))
+      })
 
       if (!plugin) {
         console.warn(`Source ${source} is not mapped`)
@@ -131,7 +132,6 @@ const main = async () => {
     await Promise.all(Object.keys(bsPlugins).map(plugin => build(plugin)))
   } catch (error) {
     console.error(error)
-
     process.exit(1)
   }
 }
