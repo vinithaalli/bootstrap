@@ -87,7 +87,6 @@ Object.keys(allPlugins).forEach(key => {
   resolvedDist.set(key, makePluginPath(key, distPath))
   resolvedSrc.set(key, makePluginPath(key, srcPath).replace('.js', ''))
 })
-
 const build = async pluginKey => {
   console.log(`Building ${pluginKey} plugin...`)
 
@@ -98,9 +97,10 @@ const build = async pluginKey => {
     input: resolvedSrc.get(pluginKey),
     plugins,
     external: source => {
+      const pattern = /^(\.+)\// // replace starting with ./ or ../
       // eslint-disable-next-line no-unused-vars
       const plugin = Object.entries(allPlugins).find(([key, path]) => {
-        return path.includes(source.replace('../', '').replace('./', ''))
+        return path.includes(source.replace(pattern, ''))
       })
 
       if (!plugin) {
