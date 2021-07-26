@@ -91,7 +91,6 @@ const build = async pluginKey => {
   console.log(`Building ${pluginKey} plugin...`)
 
   const pluginFilename = path.basename(bsPlugins[pluginKey])
-  const external = []
   const globals = {}
   const bundle = await rollup.rollup({
     input: resolvedSrc.get(pluginKey),
@@ -108,10 +107,9 @@ const build = async pluginKey => {
         return false
       }
 
-      const pluginKey = plugin[0]
-      external.push(resolvedDist.get(pluginKey))
+      const [pluginKey] = plugin
       globals[resolvedSrc.get(pluginKey)] = pluginKey
-      return external
+      return true
     }
   })
 
