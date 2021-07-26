@@ -11,11 +11,26 @@
 
 const path = require('path')
 const rollup = require('rollup')
+const glob = require('glob')
 const { babel } = require('@rollup/plugin-babel')
 const banner = require('./banner.js')
 
-const distPath = path.resolve(__dirname, '../js/dist/')
 const srcPath = path.resolve(__dirname, '../js/src/')
+
+const paths = glob.sync(srcPath + '/**/*.js')
+
+function filenameToEntity(filename) {
+  return filename.replace(/(?:^|-)[a-z]/g, char => char.slice(-1).toUpperCase())
+}
+
+const resolved = {}
+for (const filePath of paths) {
+  resolved[filenameToEntity(path.basename(filePath, '.js'))] = {
+    src: filePath.replace('.js', ''),
+    dist: filePath.replace('src', 'dist'),
+    name: filePath.replace(`${srcPath}/`, '')
+  }
+}
 
 const plugins = [
   babel({
@@ -26,108 +41,52 @@ const plugins = [
   })
 ]
 
-const utilPlugins = {
-  BackDrop: 'util/backdrop.js',
-  ScrollBarHelper: 'util/scrollbar.js',
-  sanitizeHtml: 'util/sanitizer.js',
-  Util: 'util/index.js'
-}
-
-const domPlugins = {
-  Data: 'dom/data.js',
-  EventHandler: 'dom/event-handler.js',
-  Manipulator: 'dom/manipulator.js',
-  SelectorEngine: 'dom/selector-engine.js'
-}
-
-const mainPlugins = {
-  BaseComponent: 'base-component.js',
-  Alert: 'alert.js',
-  Button: 'button.js',
-  Carousel: 'carousel.js',
-  Collapse: 'collapse.js',
-  Dropdown: 'dropdown.js',
-  Modal: 'modal.js',
-  Offcanvas: 'offcanvas.js',
-  Popover: 'popover.js',
-  ScrollSpy: 'scrollspy.js',
-  Tab: 'tab.js',
-  Toast: 'toast.js',
-  Tooltip: 'tooltip.js'
-}
-
-const nodePlugins = {
-  Popper: '@popperjs/core'
-}
-
-const bsPlugins = {
-  ...domPlugins,
-  ...utilPlugins,
-  ...mainPlugins
-}
-const allPlugins = {
-  ...bsPlugins,
-  ...nodePlugins
-}
-
-const makePluginPath = (pluginKey, basePath) => {
-  if (Object.prototype.hasOwnProperty.call(nodePlugins, pluginKey)) {
-    return nodePlugins[pluginKey]
-  }
-
-  const pluginFilename = allPlugins[pluginKey]
-
-  return path.resolve(__dirname, `${basePath}/${pluginFilename}`)
-}
-
-const resolvedDist = new Map()
-const resolvedSrc = new Map()
-
-Object.keys(allPlugins).forEach(key => {
-  resolvedDist.set(key, makePluginPath(key, distPath))
-  resolvedSrc.set(key, makePluginPath(key, srcPath).replace('.js', ''))
-})
 const build = async pluginKey => {
   console.log(`Building ${pluginKey} plugin...`)
+  const plugin = resolved[pluginKey]
 
-  const pluginFilename = path.basename(bsPlugins[pluginKey])
   const globals = {}
   const bundle = await rollup.rollup({
-    input: resolvedSrc.get(pluginKey),
+    input: plugin.src,
     plugins,
     external: source => {
       const pattern = /^(\.+)\// // replace starting with ./ or ../
+
+      if (!pattern.test(source)) { // is probably a node plugin
+        globals[source] = source
+        return true
+      }
+
       // eslint-disable-next-line no-unused-vars
-      const plugin = Object.entries(allPlugins).find(([key, path]) => {
-        return path.includes(source.replace(pattern, ''))
+      const usedPlugin = Object.entries(resolved).find(([key, path]) => {
+        return path.src.includes(source.replace(pattern, ''))
       })
 
-      if (!plugin) {
+      if (!usedPlugin) {
         console.warn(`Source ${source} is not mapped`)
         return false
       }
 
-      const [pluginKey] = plugin
-      globals[resolvedSrc.get(pluginKey)] = pluginKey
+      globals[usedPlugin[1].src] = usedPlugin[0]
       return true
     }
   })
 
   await bundle.write({
-    banner: banner(pluginFilename),
+    banner: banner(plugin.name),
     format: 'umd',
     name: pluginKey,
     sourcemap: true,
     globals,
-    file: resolvedDist.get(pluginKey)
+    file: plugin.dist
   })
 
   console.log(`Building ${pluginKey} plugin... Done!`)
 }
 
-const main = async () => {
+const main = () => {
   try {
-    await Promise.all(Object.keys(bsPlugins).map(plugin => build(plugin)))
+    Promise.all(Object.keys(resolved).map(plugin => build(plugin)))
   } catch (error) {
     console.error(error)
     process.exit(1)
