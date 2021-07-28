@@ -28,7 +28,7 @@ for (const filePath of paths) {
   resolved[filenameToEntity(path.basename(filePath, '.js'))] = {
     src: filePath.replace('.js', ''),
     dist: filePath.replace('src', 'dist'),
-    name: filePath.replace(`${srcPath}/`, '')
+    name: path.relative(srcPath, filePath)
   }
 }
 
@@ -42,7 +42,6 @@ const plugins = [
 ]
 
 const build = async pluginKey => {
-  console.log(`Building ${pluginKey} plugin...`)
   const plugin = resolved[pluginKey]
 
   const globals = {}
@@ -58,8 +57,8 @@ const build = async pluginKey => {
       }
 
       // eslint-disable-next-line no-unused-vars
-      const usedPlugin = Object.entries(resolved).find(([key, path]) => {
-        return path.src.includes(source.replace(pattern, ''))
+      const usedPlugin = Object.entries(resolved).find(([key, p]) => {
+        return p.src.includes(source.replace(pattern, ''))
       })
 
       if (!usedPlugin) {
@@ -67,7 +66,7 @@ const build = async pluginKey => {
         return false
       }
 
-      globals[usedPlugin[1].src] = usedPlugin[0]
+      globals[path.normalize(usedPlugin[1].src)] = usedPlugin[0]
       return true
     }
   })
@@ -84,13 +83,19 @@ const build = async pluginKey => {
   console.log(`Building ${pluginKey} plugin... Done!`)
 }
 
-const main = () => {
+(async () => {
   try {
-    Promise.all(Object.keys(resolved).map(plugin => build(plugin)))
+    const basename = path.basename(__filename)
+    const timeLabel = `[${basename}] finished`
+
+    console.log('Building individual plugins...')
+    console.time(timeLabel)
+
+    await Promise.all(Object.keys(resolved).map(plugin => build(plugin)))
+
+    console.timeEnd(timeLabel)
   } catch (error) {
     console.error(error)
     process.exit(1)
   }
-}
-
-main()
+})()
