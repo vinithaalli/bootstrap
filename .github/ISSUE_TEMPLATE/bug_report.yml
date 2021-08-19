@@ -16,24 +16,24 @@ body:
           required: true
         - label: I have [validated](https://html5.validator.nu/) any HTML to avoid common problems
           required: true
-        - label: I have **read** the [contributing guidelines](https://github.com/twbs/bootstrap/blob/main/.github/CONTRIBUTING.md)
+        - label: I have read the [contributing guidelines](https://github.com/twbs/bootstrap/blob/main/.github/CONTRIBUTING.md)
           required: true
   - type: textarea
     id: what-happened
     attributes:
       label: Describe the issue
-      description: Provide a general summary of the issue, also tell us, what did you expect to happen
+      description: Provide a general summary of the issue and you expected to happen.
       placeholder: Tell us what you see!
     validations:
       required: true
   - type: textarea
     id: steps-to-reproduce
     attributes:
-      label: Steps to Reproduce
-      description: use bullets to guide us in summary
+      label: Steps to reproduce
+      description: Tell us how to recreate the issue.
       placeholder: |
-        1. [First Step]
-        2. [Second Step]
+        1. [First step]
+        2. [Second step]
         3. [and so on...]
     validations:
       required: true
@@ -41,7 +41,7 @@ body:
     id: reduced-test-case
     attributes:
       label: Reduced test case
-      description: Provide a link of a [reduced test case](https://css-tricks.com/reduced-test-cases/) or suggested fix using [CodePen](https://codepen.io/) or [JS Bin](https://jsbin.com/)
+      description: Include links to a [reduced test case](https://css-tricks.com/reduced-test-cases/) or suggested fix using [CodePen](https://codepen.io/) or [JS Bin](https://jsbin.com/).
     validations:
       required: true
   - type: markdown
@@ -50,7 +50,7 @@ body:
   - type: dropdown
     id: operating-system
     attributes:
-      label: In what operating system are you seeing the problem on?
+      label: What operating system are you seeing the problem on?
       multiple: true
       options:
         - Windows
@@ -73,7 +73,7 @@ body:
   - type: dropdown
     id: version
     attributes:
-      label: What version of Bootstrap you use?
+      label: What version of Bootstrap are you using?
       multiple: true
       options:
         - 3
