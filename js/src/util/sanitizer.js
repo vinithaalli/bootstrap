@@ -5,7 +5,7 @@
  * --------------------------------------------------------------------------
  */
 
-const uriAttrs = new Set([
+const uriAttributes = new Set([
   'background',
   'cite',
   'href',
@@ -32,12 +32,12 @@ const SAFE_URL_PATTERN = /^(?:(?:https?|mailto|ftp|tel|file):|[^#&/:?]*(?:[#/?]|
  */
 const DATA_URL_PATTERN = /^data:(?:image\/(?:bmp|gif|jpeg|jpg|png|tiff|webp)|video\/(?:mpeg|mp4|ogg|webm)|audio\/(?:mp3|oga|ogg|opus));base64,[\d+/a-z]+=*$/i
 
-const allowedAttribute = (attr, allowedAttributeList) => {
-  const attrName = attr.nodeName.toLowerCase()
+const allowedAttribute = (attribute, allowedAttributeList) => {
+  const attributeName = attribute.nodeName.toLowerCase()
 
-  if (allowedAttributeList.includes(attrName)) {
-    if (uriAttrs.has(attrName)) {
-      return Boolean(SAFE_URL_PATTERN.test(attr.nodeValue) || DATA_URL_PATTERN.test(attr.nodeValue))
+  if (allowedAttributeList.includes(attributeName)) {
+    if (uriAttributes.has(attributeName)) {
+      return Boolean(SAFE_URL_PATTERN.test(attribute.nodeValue) || DATA_URL_PATTERN.test(attribute.nodeValue))
     }
 
     return true
@@ -47,7 +47,7 @@ const allowedAttribute = (attr, allowedAttributeList) => {
 
   // Check if a regular expression validates the attribute.
   for (const element of regExp) {
-    if (element.test(attrName)) {
+    if (element.test(attributeName)) {
       return true
     }
   }
@@ -100,24 +100,23 @@ export function sanitizeHtml(unsafeHtml, allowList, sanitizeFn) {
 
   const domParser = new window.DOMParser()
   const createdDocument = domParser.parseFromString(unsafeHtml, 'text/html')
-  const allowlistKeys = Object.keys(allowList)
   const elements = [].concat(...createdDocument.body.querySelectorAll('*'))
 
-  for (const el of elements) {
-    const elName = el.nodeName.toLowerCase()
+  for (const element of elements) {
+    const elementName = element.nodeName.toLowerCase()
 
-    if (!allowlistKeys.includes(elName)) {
-      el.remove()
+    if (!Object.keys(allowList).includes(elementName)) {
+      element.remove()
 
       continue
     }
 
-    const attributeList = [].concat(...el.attributes)
-    const allowedAttributes = [].concat(allowList['*'] || [], allowList[elName] || [])
+    const attributeList = [].concat(...element.attributes)
+    const allowedAttributes = [].concat(allowList['*'] || [], allowList[elementName] || [])
 
-    for (const attr of attributeList) {
-      if (!allowedAttribute(attr, allowedAttributes)) {
-        el.removeAttribute(attr.nodeName)
+    for (const attribute of attributeList) {
+      if (!allowedAttribute(attribute, allowedAttributes)) {
+        element.removeAttribute(attribute.nodeName)
       }
     }
   }
