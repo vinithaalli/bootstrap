@@ -305,7 +305,7 @@ class Carousel extends BaseComponent {
     }
 
     for (const itemImg of SelectorEngine.find(SELECTOR_ITEM_IMG, this._element)) {
-      EventHandler.on(itemImg, EVENT_DRAG_START, e => e.preventDefault())
+      EventHandler.on(itemImg, EVENT_DRAG_START, event => event.preventDefault())
     }
 
     if (this._pointerEvent) {
