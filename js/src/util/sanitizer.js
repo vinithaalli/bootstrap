@@ -106,7 +106,7 @@ export function sanitizeHtml(unsafeHtml, allowList, sanitizeFn) {
     }
 
     const attributeList = [].concat(...element.attributes)
-    const allowedAttributes = [].concat(allowList['*'] || [], allowList[elementName] || [])
+    const allowedAttributes = [...(allowList['*'] || []), ...(allowList[elementName] || [])]
 
     for (const attribute of attributeList) {
       if (!allowedAttribute(attribute, allowedAttributes)) {
