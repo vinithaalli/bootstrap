@@ -1,5 +1,6 @@
 // Base class
 .tooltip {
+  // scss-docs-start tooltip-css-vars
   --#{$variable-prefix}tooltip-padding: #{$tooltip-padding-y} #{$tooltip-padding-x};
   --#{$variable-prefix}tooltip-font-size: #{$tooltip-font-size};
   --#{$variable-prefix}tooltip-color: #{$tooltip-color};
@@ -8,6 +9,7 @@
   --#{$variable-prefix}tooltip-opacity: #{$tooltip-opacity};
   --#{$variable-prefix}tooltip-arrow-width: #{$tooltip-arrow-width};
   --#{$variable-prefix}tooltip-arrow-height: #{$tooltip-arrow-height};
+  // scss-docs-end tooltip-css-vars
 
   $tooltip-arrow-color: null;
 
