@@ -5,11 +5,7 @@
  * --------------------------------------------------------------------------
  */
 
-import {
-  defineJQueryPlugin,
-  getElement,
-  typeCheckConfig
-} from './util/index'
+import { defineJQueryPlugin, getElement, typeCheckConfig } from './util/index'
 import EventHandler from './dom/event-handler'
 import Manipulator from './dom/manipulator'
 import SelectorEngine from './dom/selector-engine'
@@ -47,7 +43,7 @@ const CLASS_NAME_ACTIVE = 'active'
 const SELECTOR_DATA_SPY = '[data-bs-spy="scroll"]'
 const SELECTOR_NAV_LIST_GROUP = '.nav, .list-group'
 const SELECTOR_NAV_LINKS = '.nav-link'
-const SELECTOR_NAV_ITEMS = '.nav-item'
+// const SELECTOR_NAV_ITEMS = '.nav-item'
 const SELECTOR_LIST_ITEMS = '.list-group-item'
 const SELECTOR_DROPDOWN = '.dropdown'
 const SELECTOR_DROPDOWN_TOGGLE = '.dropdown-toggle'
@@ -140,21 +136,13 @@ class ScrollSpy extends BaseComponent {
     if (target.classList.contains(CLASS_NAME_DROPDOWN_ITEM)) { // Activate dropdown parents
       SelectorEngine.findOne(SELECTOR_DROPDOWN_TOGGLE, target.closest(SELECTOR_DROPDOWN))
         .classList.add(CLASS_NAME_ACTIVE)
-    } else {
-      SelectorEngine.parents(target, SELECTOR_NAV_LIST_GROUP)
-        .forEach(listGroup => {
-          // Set triggered links parents as active
-          // With both <ul> and <nav> markup a parent is the previous sibling of any nav ancestor
-          SelectorEngine.prev(listGroup, `${SELECTOR_NAV_LINKS}, ${SELECTOR_LIST_ITEMS}`)
-            .forEach(item => item.classList.add(CLASS_NAME_ACTIVE))
+    }
 
-          // Handle special case when .nav-link is inside .nav-item
-          SelectorEngine.prev(listGroup, SELECTOR_NAV_ITEMS)
-            .forEach(navItem => {
-              SelectorEngine.children(navItem, SELECTOR_NAV_LINKS)
-                .forEach(item => item.classList.add(CLASS_NAME_ACTIVE))
-            })
-        })
+    for (const listGroup of SelectorEngine.parents(target, SELECTOR_NAV_LIST_GROUP)) {
+      // Set triggered links parents as active
+      // With both <ul> and <nav> markup a parent is the previous sibling of any nav ancestor
+      SelectorEngine.prev(listGroup, `${SELECTOR_NAV_LINKS}, ${SELECTOR_LIST_ITEMS}`)
+        .forEach(item => item.classList.add(CLASS_NAME_ACTIVE))
     }
 
     EventHandler.trigger(this._element, EVENT_ACTIVATE, {
