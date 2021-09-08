@@ -692,7 +692,9 @@ $(function () {
 
     $toggleBtn.trigger('click')
 
-    setTimeout(done, 500)
+    setTimeout(function () {
+      done()
+    }, 500)
   })
 
   QUnit.test('should not try to open a modal which is already visible', function (assert) {

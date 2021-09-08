@@ -232,7 +232,9 @@ $(function () {
 
     $test.bootstrapCollapse('show')
 
-    setTimeout(done, 0)
+    setTimeout(function () {
+      done()
+    }, 0)
   })
 
   QUnit.test('should open a collapse when initialized with "show" option if not already shown', function (assert) {
@@ -247,7 +249,9 @@ $(function () {
 
     $test.bootstrapCollapse('show')
 
-    setTimeout(done, 0)
+    setTimeout(function () {
+      done()
+    }, 0)
   })
 
   QUnit.test('should not show a collapse when initialized with "hide" option if already hidden', function (assert) {
@@ -261,7 +265,9 @@ $(function () {
       })
       .bootstrapCollapse('hide')
 
-    setTimeout(done, 0)
+    setTimeout(function () {
+      done()
+    }, 0)
   })
 
   QUnit.test('should hide a collapse when initialized with "hide" option if not already hidden', function (assert) {
@@ -275,7 +281,9 @@ $(function () {
       })
       .bootstrapCollapse('hide')
 
-    setTimeout(done, 0)
+    setTimeout(function () {
+      done()
+    }, 0)
   })
 
   QUnit.test('should remove "collapsed" class from active accordion target', function (assert) {
